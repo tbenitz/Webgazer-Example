@@ -101,7 +101,17 @@ var camera_instructions = {
 
 // ────────────────────────────────────────────────
 var init_camera = {
-  type: 'webgazer-init-camera'
+  type: 'webgazer-init-camera',
+  on_load: function() {
+    console.log("Attempting getUserMedia...");
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        console.log("Camera stream acquired!", stream);
+      })
+      .catch(err => {
+        console.error("getUserMedia failed:", err.name, err.message);
+      });
+  }
 };
 
 // ────────────────────────────────────────────────
