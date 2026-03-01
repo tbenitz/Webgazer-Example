@@ -1,98 +1,240 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <script src="https://unpkg.com/jspsych@7.3.4"></script>
-  <link rel="stylesheet" href="https://unpkg.com/jspsych@7.3.4/css/jspsych.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WebGazer Eye-Tracking Test — Calibration & Demo</title>
 
-  <!-- WebGazer & jsPsych-WebGazer extension (use a known working version) -->
-  <script src="https://cdn.jsdelivr.net/gh/jspsych/jsPsych@7.0.0/examples/js/webgazer/webgazer.js"></script>
-  <script src="https://unpkg.com/@jspsych/extension-webgazer@1.1.3"></script>
+  <!-- jsPsych core & CSS -->
+  <script src="https://cdn.jsdelivr.net/npm/jspsych@6.3.1"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspsych@6.3.1/css/jspsych.css"/>
 
-  <!-- Plugins you need -->
-  <script src="https://unpkg.com/@jspsych/plugin-preload@1.1.3"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.3"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-webgazer-init-camera@1.1.3"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-webgazer-calibrate@1.1.3"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-webgazer-validate@1.1.3"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.3"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.3"></script>
+  <!-- WebGazer & jsPsych extension -->
+  <script src="https://cdn.jsdelivr.net/gh/jspsych/jsPsych@6.3.1/examples/js/webgazer/webgazer.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/jspsych/jsPsych@6.3.1/extensions/jspsych-ext-webgazer.js"></script>
+
+  <!-- Required plugins -->
+  <script src="https://cdn.jsdelivr.net/gh/jspsych/jsPsych@6.3.1/plugins/jspsych-preload.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/jspsych/jsPsych@6.3.1/plugins/jspsych-html-button-response.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/jspsych/jsPsych@6.3.1/plugins/jspsych-html-keyboard-response.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/jspsych/jsPsych@6.3.1/plugins/jspsych-image-keyboard-response.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/jspsych/jsPsych@6.3.1/plugins/jspsych-webgazer-init-camera.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/jspsych/jsPsych@6.3.1/plugins/jspsych-webgazer-calibrate.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/jspsych/jsPsych@6.3.1/plugins/jspsych-webgazer-validate.js"></script>
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(to bottom, #f0f4f8, #d9e2ec);
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    #jspsych-target {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      padding: 30px;
+      min-height: 70vh;
+    }
+    .jspsych-btn {
+      font-size: 1.2rem !important;
+      padding: 14px 32px !important;
+      margin: 12px 8px !important;
+      border-radius: 8px !important;
+      background: #0066cc !important;
+      color: white !important;
+      border: none !important;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .jspsych-btn:hover {
+      background: #0055aa !important;
+    }
+    h1, h2 {
+      color: #1a3c6d;
+      text-align: center;
+    }
+    p {
+      line-height: 1.6;
+      font-size: 1.1rem;
+    }
+    .instructions {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 5px solid #0066cc;
+    }
+  </style>
 </head>
 <body>
-<script>
 
-// Use a real image URL instead of missing 'img/blue.png'
+<div id="jspsych-target"></div>
+
+<script>
+// ────────────────────────────────────────────────
+// Preload (using real external image)
 var preload = {
   type: 'preload',
-  images: ['https://via.placeholder.com/400x300/0000FF/FFFFFF?text=Look+Here']
+  images: ['https://via.placeholder.com/500x350/0066cc/ffffff?text=Look+Here+(Blue)']
 };
 
+// ────────────────────────────────────────────────
+// Camera permission screen
 var camera_instructions = {
   type: 'html-button-response',
   stimulus: `
-    <p>Allow camera access to continue (needed for eye tracking).</p>
-    <p>It may take 20–30 seconds to start.</p>
+    <div class="instructions">
+      <h2>Camera Access Required</h2>
+      <p>This experiment uses eye tracking via your webcam.</p>
+      <p>You must allow camera access when prompted.</p>
+      <p style="color:#d32f2f; font-weight:bold;">If you do not allow access, you cannot continue.</p>
+      <p>It may take 15–40 seconds for the camera to initialize after permission.</p>
+    </div>
   `,
-  choices: ['Got it']
+  choices: ['Allow & Continue'],
+  button_html: '<button class="jspsych-btn">%choice%</button>'
 };
 
-var init_camera = { type: 'webgazer-init-camera' };
+// ────────────────────────────────────────────────
+var init_camera = {
+  type: 'webgazer-init-camera'
+};
 
+// ────────────────────────────────────────────────
 var calibration_instructions = {
   type: 'html-button-response',
   stimulus: `
-    <p>Calibration: Look at each dot and **click** it.</p>
+    <div class="instructions">
+      <h2>Calibration</h2>
+      <p>We'll now calibrate the eye tracker.</p>
+      <p><strong>Instructions:</strong></p>
+      <ul>
+        <li>Look directly at each red dot that appears.</li>
+        <li><strong>Click</strong> on the dot after looking at it.</li>
+        <li>Repeat for all points (we'll do multiple rounds for accuracy).</li>
+      </ul>
+      <p>Try to keep your head still and in the center of the camera view.</p>
+    </div>
   `,
-  choices: ['Start calibration']
+  choices: ['Start Calibration'],
+  button_html: '<button class="jspsych-btn">%choice%</button>'
 };
 
 var calibration = {
   type: 'webgazer-calibrate',
-  calibration_points: [[25,25], [75,25], [50,50], [25,75], [75,75]],
+  calibration_points: [
+    [25,25], [75,25], [50,50], [25,75], [75,75],
+    [10,10], [90,10], [10,90], [90,90]   // extra points for better accuracy
+  ],
   repetitions_per_point: 2,
-  randomize_calibration_order: true
+  randomize_calibration_order: true,
+  calibration_mode: 'click'   // or 'view' if you prefer no clicking
 };
 
+// ────────────────────────────────────────────────
 var validation_instructions = {
   type: 'html-button-response',
   stimulus: `
-    <p>Validation: Just **look** at each dot (no clicking needed).</p>
+    <div class="instructions">
+      <h2>Validation</h2>
+      <p>Now we check how accurate the calibration is.</p>
+      <p><strong>Instructions:</strong></p>
+      <ul>
+        <li>Look at each dot as it appears.</li>
+        <li><strong>Do NOT click</strong> this time — just fixate on the dot.</li>
+        <li>Stay still and keep looking naturally.</li>
+      </ul>
+    </div>
   `,
-  choices: ['Start validation']
+  choices: ['Start Validation'],
+  button_html: '<button class="jspsych-btn">%choice%</button>'
 };
 
 var validation = {
   type: 'webgazer-validate',
-  validation_points: [[25,25], [75,25], [50,50], [25,75], [75,75]],
-  roi_radius: 200,
+  validation_points: [
+    [25,25], [75,25], [50,50], [25,75], [75,75]
+  ],
+  roi_radius: 200,              // tolerance radius in pixels
   time_to_saccade: 1000,
   validation_duration: 2000,
   data: { task: 'validate' }
 };
 
+// ────────────────────────────────────────────────
+var recalibrate_instructions = {
+  type: 'html-button-response',
+  stimulus: `
+    <div class="instructions" style="border-left-color: #d32f2f;">
+      <h2>Calibration Accuracy Low</h2>
+      <p>The eye tracker didn't achieve the desired accuracy.</p>
+      <p>Let's do another round of calibration + validation.</p>
+      <p>Try to:</p>
+      <ul>
+        <li>Keep your head very still</li>
+        <li>Look precisely at the center of each dot</li>
+        <li>Make sure lighting is good (not too dark/bright)</li>
+      </ul>
+    </div>
+  `,
+  choices: ['Recalibrate Now'],
+  button_html: '<button class="jspsych-btn">%choice%</button>'
+};
+
 var recalibrate = {
-  timeline: [recalibrate_instructions, calibration, validation_instructions, validation],
+  timeline: [
+    recalibrate_instructions,
+    calibration,
+    validation_instructions,
+    validation
+  ],
   conditional_function: function() {
-    var vd = jsPsych.data.get().filter({task: 'validate'}).values()[0];
-    return vd.percent_in_roi.some(x => x < 50);
+    // Get the most recent validation data
+    var validation_data = jsPsych.data.get().filter({task: 'validate'}).last(1).values()[0];
+    if (!validation_data) return false;
+    // Recalibrate if ANY point had <50% samples in ROI
+    return validation_data.percent_in_roi.some(function(pct) {
+      return pct < 50;
+    });
   }
 };
 
+// ────────────────────────────────────────────────
 var calibration_done = {
   type: 'html-button-response',
-  stimulus: `<p>Calibration finished!</p>`,
-  choices: ['Continue']
+  stimulus: `
+    <div class="instructions" style="border-left-color: #2e7d32;">
+      <h2>Calibration Complete!</h2>
+      <p>Great job — the eye tracker is now ready.</p>
+      <p>Next you'll see a test image. Just look at it naturally for a few seconds.</p>
+    </div>
+  `,
+  choices: ['Continue to Test'],
+  button_html: '<button class="jspsych-btn">%choice%</button>'
 };
 
-var begin = {
+// ────────────────────────────────────────────────
+var begin_test = {
   type: 'html-keyboard-response',
-  stimulus: `<p>Next you'll see a blue square.<br>Just look at it for 2 seconds.<br>Press any key to begin.</p>`
+  stimulus: `
+    <div class="instructions">
+      <h2>Test Trial</h2>
+      <p>Look naturally at the blue square that appears.</p>
+      <p>The trial ends automatically after 4 seconds.</p>
+      <p>Press <strong>any key</strong> when ready.</p>
+    </div>
+  `
 };
 
-var trial = {
+var test_trial = {
   type: 'image-keyboard-response',
-  stimulus: 'https://via.placeholder.com/400x300/0000FF/FFFFFF?text=Look+Here+(Blue)',
+  stimulus: 'https://via.placeholder.com/500x350/0066cc/ffffff?text=Look+Here+(Blue)',
   choices: jsPsych.NO_KEYS,
-  trial_duration: 2000,
+  trial_duration: 4000,
   extensions: [
     {
       type: 'webgazer',
@@ -101,16 +243,25 @@ var trial = {
   ]
 };
 
-var show_data = {
+// ────────────────────────────────────────────────
+var show_results = {
   type: 'html-keyboard-response',
   stimulus: function() {
-    let d = jsPsych.data.getLastTrialData().values()[0];
-    return `<pre>${JSON.stringify(d, null, 2)}</pre>`;
+    var last_trial = jsPsych.data.getLastTrialData().values()[0];
+    var json = JSON.stringify(last_trial, null, 2);
+    return `
+      <h2>Eye-Tracking Results (Last Trial)</h2>
+      <pre style="text-align:left; background:#f5f5f5; padding:15px; border-radius:8px; overflow:auto; max-height:400px;">${json}</pre>
+      <p>Press any key to finish.</p>
+    `;
   },
   choices: jsPsych.NO_KEYS
 };
 
+// ────────────────────────────────────────────────
+// Run the experiment
 jsPsych.init({
+  display_element: 'jspsych-target',
   timeline: [
     preload,
     camera_instructions,
@@ -119,15 +270,19 @@ jsPsych.init({
     calibration,
     validation_instructions,
     validation,
-    recalibrate,
+    recalibrate,              // loops back only if needed
     calibration_done,
-    begin,
-    trial,
-    show_data
+    begin_test,
+    test_trial,
+    show_results
   ],
-  extensions: [{ type: 'webgazer' }]
+  extensions: [
+    { type: 'webgazer' }
+  ],
+  on_finish: function() {
+    jsPsych.data.displayData();
+  }
 });
-
 </script>
 </body>
 </html>
